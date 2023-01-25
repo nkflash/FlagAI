@@ -31,7 +31,7 @@ trainer = Trainer(
 )
 
 ## 
-enable_debug = False
+enable_debug = True
 ## 
 if enable_debug:
     trainer.set_seed(2023)
@@ -60,10 +60,10 @@ def read_file():
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
         part_file = './debug.txt'
     path = '/share/project/ldwang/data/pile/train/'
-    #if True: # enable_debug
-    for part_file in os.listdir(path):
+    if True: # enable_debug
+    #for part_file in os.listdir(path):
         filename = path+part_file
-        #filename = part_file # enable_debug
+        filename = part_file # enable_debug
         # print('*'*20, "filename", filename)
         with open(filename, 'r', encoding='utf-8') as f:
             lines = f.readlines()
