@@ -34,6 +34,15 @@ from flagai.utils import Timers
 from flagai.launch import launch_dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 from flagai.fp16 import DynamicLossScaler
+from torch.distributed.fsdp import (
+   FullyShardedDataParallel,
+   CPUOffload,
+)
+from torch.distributed.fsdp.wrap import (
+   size_based_auto_wrap_policy,
+   always_wrap_policy,
+)
+import functools
 
 # TODO
 # torch.autograd.set_detect_anomaly(True)
@@ -324,6 +333,12 @@ class EnvTrainer():
             model = DDP(model,
                         device_ids=[self.local_rank],
                         find_unused_parameters=find_unused_parameters)
+#            my_auto_wrap_policy = functools.partial(size_based_auto_wrap_policy, min_num_params=1e9)
+            model = FullyShardedDataParallel(
+                model,
+                auto_wrap_policy=size_based_auto_wrap_policy,
+                #auto_wrap_policy=my_auto_wrap_policy,
+            )
 
         elif self.env_type == 'pytorch':
             model.to(self.pytorch_device)
