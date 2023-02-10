@@ -59,8 +59,7 @@ def read_file():
 
     if enable_debug:
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        #part_file = './debug.txt'
-        part_file = 'examples/gpt2_title_generation/data/train.src'
+        part_file = './debug.txt'
     path = '/share/project/ldwang/data/pile/train/'
     if True: # enable_debug
     #for part_file in os.listdir(path):
@@ -79,8 +78,7 @@ def read_file_dev():
 
     if enable_debug:
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        #part_file = './dev.txt'
-        part_file = 'examples/gpt2_title_generation/data/train.src'
+        part_file = './dev.txt'
     else:
         part_file = '/share/project/ldwang/data/pile/val.txt'
     if True:
