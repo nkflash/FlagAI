@@ -8,33 +8,25 @@ from flagai.auto_model.auto_loader import AutoLoader
 from flagai.trainer import Trainer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+# single gpu
 trainer = Trainer(
     env_type="pytorch",
     experiment_name="gpt2_xl",
-    batch_size=1,
+    batch_size=2,
     gradient_accumulation_steps=1,
     lr=2e-4,
     weight_decay=1e-3,
-    epochs=10000,
+    epochs=1,
     log_interval=10,
     eval_interval=10000,
-    num_gpus=1,
     load_dir=None,
     pytorch_device=device,
     save_dir="checkpoints_gpt2_xl",
     checkpoint_activations=False,
     save_interval=1000,
-    fp16=True,
-    hostfile='./hostfile',
-    training_script=__file__
 )
 
-## 
-enable_debug = True
-## 
-if enable_debug:
-    trainer.set_seed(2023)
+src_dir = '/share/project/ldwang/data/pile/train/00.txt'
 
 model_dir = "./state_dict/"
 os.makedirs(model_dir, exist_ok=True)
@@ -44,55 +36,28 @@ from flagai.data.tokenizer import Tokenizer
 model_name = "GPT2-xlarge-en"
 cache_dir = model_dir + model_name
 tokenizer = Tokenizer.from_pretrained(model_name, cache_dir=cache_dir)
-print(cache_dir)
-# print('*'*20, "tokenizer", tokenizer)
+print('*'*20, "tokenizer", tokenizer)
 
 config_file = model_dir + model_name + "/config.json"
-# print('*'*20, "config_file", config_file)
+print('*'*20, "config_file", config_file)
 from flagai.model.gpt2_model import GPT2Model
 model = GPT2Model.init_from_json(config_file=config_file)
-# print('*'*20, "model", model)
+print('*'*20, "model", model)
 
 def read_file():
     src = []
     tgt = []
 
-    if enable_debug:
-        part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        #part_file = './debug.txt'
-        part_file = 'examples/gpt2_title_generation/data/train.src'
-    path = '/share/project/ldwang/data/pile/train/'
-    if True: # enable_debug
-    #for part_file in os.listdir(path):
-        filename = path+part_file
-        filename = part_file # enable_debug
-        # print('*'*20, "filename", filename)
-        with open(filename, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            for line in lines:
-                src.append(line.strip('\n').lower())
+    with open(src_dir, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        for line in lines:
+            src.append(line.strip('\n').lower())
+
     return src, src
 
-def read_file_dev():
-    src = []
-    tgt = []
-
-    if enable_debug:
-        part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        #part_file = './dev.txt'
-        part_file = 'examples/gpt2_title_generation/data/train.src'
-    else:
-        part_file = '/share/project/ldwang/data/pile/val.txt'
-    if True:
-        filename = part_file
-        # print('*'*20, "filename", filename)
-        with open(filename, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            for line in lines:
-                src.append(line.strip('\n').lower())
-    return src, src
 
 class GPT2Seq2seqDataset(Dataset):
+
     def __init__(self, sents_src, sents_tgt, tokenizer, maxlen=512):
         super(GPT2Seq2seqDataset, self).__init__()
         self.sents_src = sents_src
@@ -123,7 +88,7 @@ class GPT2Seq2seqDataset(Dataset):
 
         input_ids = [data["input_ids"] for data in batch]
         max_length = max([len(t) for t in input_ids])
-        input_ids = padding(input_ids, max_length)[:,:maxlen]
+        input_ids = padding(input_ids, max_length)
 
         data = {
             "input_ids": input_ids,
@@ -138,12 +103,8 @@ print('*'*20, 'data_len', data_len)
 train_src = sents_src
 train_tgt = train_src
 
-sents_src, sents_tgt = read_file_dev()
-data_len = len(sents_tgt)
-print('*'*20, 'data_len dev', data_len)
-
-val_src = sents_src
-val_tgt = sents_tgt
+val_src = train_src
+val_tgt = train_tgt
 
 train_dataset = GPT2Seq2seqDataset(train_src,
                                    train_tgt,
@@ -154,10 +115,14 @@ val_dataset = GPT2Seq2seqDataset(val_src,
                                  tokenizer=tokenizer,
                                  maxlen=maxlen)
 
+optimizer = torch.optim.Adam(model.parameters(),
+                             lr=1e-5,
+                             weight_decay=1e-5)
+
 trainer.train(model,
               train_dataset=train_dataset,
               valid_dataset=val_dataset,
               collate_fn=GPT2Seq2seqDataset.collate_fn,
-              optimizer=None
+              optimizer=optimizer
               )
 

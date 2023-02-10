@@ -10,16 +10,16 @@ from flagai.trainer import Trainer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 trainer = Trainer(
-    env_type="pytorch",
+    env_type="bmtrain",
     experiment_name="gpt2_xl",
-    batch_size=1,
+    batch_size=16,
     gradient_accumulation_steps=1,
     lr=2e-4,
     weight_decay=1e-3,
-    epochs=10000,
+    epochs=10,
     log_interval=10,
     eval_interval=10000,
-    num_gpus=1,
+    num_gpus=2,
     load_dir=None,
     pytorch_device=device,
     save_dir="checkpoints_gpt2_xl",
@@ -31,7 +31,7 @@ trainer = Trainer(
 )
 
 ## 
-enable_debug = True
+enable_debug = False
 ## 
 if enable_debug:
     trainer.set_seed(2023)
@@ -44,7 +44,6 @@ from flagai.data.tokenizer import Tokenizer
 model_name = "GPT2-xlarge-en"
 cache_dir = model_dir + model_name
 tokenizer = Tokenizer.from_pretrained(model_name, cache_dir=cache_dir)
-print(cache_dir)
 # print('*'*20, "tokenizer", tokenizer)
 
 config_file = model_dir + model_name + "/config.json"
@@ -59,13 +58,12 @@ def read_file():
 
     if enable_debug:
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        #part_file = './debug.txt'
-        part_file = 'examples/gpt2_title_generation/data/train.src'
+        part_file = './debug.txt'
     path = '/share/project/ldwang/data/pile/train/'
-    if True: # enable_debug
-    #for part_file in os.listdir(path):
+    #if True: # enable_debug
+    for part_file in os.listdir(path):
         filename = path+part_file
-        filename = part_file # enable_debug
+        #filename = part_file # enable_debug
         # print('*'*20, "filename", filename)
         with open(filename, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -79,8 +77,7 @@ def read_file_dev():
 
     if enable_debug:
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        #part_file = './dev.txt'
-        part_file = 'examples/gpt2_title_generation/data/train.src'
+        part_file = './dev.txt'
     else:
         part_file = '/share/project/ldwang/data/pile/val.txt'
     if True:

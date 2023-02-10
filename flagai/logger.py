@@ -45,7 +45,7 @@ class LoggerFactory:
 
 
 if 'logger' not in dir():
-    logger = LoggerFactory.create_logger(name="DeepSpeed", level=logging.INFO)
+    logger = LoggerFactory.create_logger(name="FlagAI", level=logging.INFO)
 while len(logger.handlers) > 1:
     # Why is this happening?
     logger.removeHandler(logger.handlers[-1])
@@ -60,9 +60,23 @@ def log_dist(message, ranks=None, level=logging.INFO):
         ranks (list)
         level (int)
     """
-    should_log = not dist.is_initialized()
+
+    # TODO
+    # export ENV_TYPE=bmtrain
+    my_rank = -1
+    import os
+    if os.getenv('ENV_TYPE') == 'bmtrain':
+        should_log = True
+        try:
+            import bmtrain as bmt
+            my_rank = bmt.rank() if bmt.init.is_initialized() else -1
+        except:
+            pass
+    else:
+        should_log = not dist.is_initialized()
+        my_rank = dist.get_rank() if dist.is_initialized() else -1
+        
     ranks = ranks or []
-    my_rank = dist.get_rank() if dist.is_initialized() else -1
     if ranks and not should_log:
         should_log = ranks[0] == -1
         should_log = should_log or (my_rank in set(ranks))
