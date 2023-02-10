@@ -14,9 +14,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # You can input all parameters by the command line.
 # For example: python train_env_trainer.py --epochs=300 --batch_size=4 --env_type=pytorch
 env_args = EnvArgs(
-    env_type="bmtrain",
+    env_type="pytorch",
     experiment_name="gpt2_xl",
-    batch_size=16,
+    batch_size=1,
     gradient_accumulation_steps=1,
     lr=2e-4,
     weight_decay=1e-3,
