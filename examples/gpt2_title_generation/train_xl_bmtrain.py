@@ -10,16 +10,16 @@ from flagai.trainer import Trainer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 trainer = Trainer(
-    env_type="bmtrain",
+    env_type="pytorch",
     experiment_name="gpt2_xl",
-    batch_size=16,
+    batch_size=1,
     gradient_accumulation_steps=1,
     lr=2e-4,
     weight_decay=1e-3,
     epochs=10,
     log_interval=10,
     eval_interval=10000,
-    num_gpus=2,
+    num_gpus=1,
     load_dir=None,
     pytorch_device=device,
     save_dir="checkpoints_gpt2_xl",
@@ -44,6 +44,7 @@ from flagai.data.tokenizer import Tokenizer
 model_name = "GPT2-xlarge-en"
 cache_dir = model_dir + model_name
 tokenizer = Tokenizer.from_pretrained(model_name, cache_dir=cache_dir)
+print(cache_dir)
 # print('*'*20, "tokenizer", tokenizer)
 
 config_file = model_dir + model_name + "/config.json"
@@ -58,7 +59,8 @@ def read_file():
 
     if enable_debug:
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        part_file = './debug.txt'
+        #part_file = './debug.txt'
+        part_file = 'examples/gpt2_title_generation/data/train.src'
     path = '/share/project/ldwang/data/pile/train/'
     if True: # enable_debug
     #for part_file in os.listdir(path):
@@ -77,7 +79,8 @@ def read_file_dev():
 
     if enable_debug:
         part_file = '/share/project/ldwang/data/pile/train/00.txt'
-        part_file = './dev.txt'
+        #part_file = './dev.txt'
+        part_file = 'examples/gpt2_title_generation/data/train.src'
     else:
         part_file = '/share/project/ldwang/data/pile/val.txt'
     if True:

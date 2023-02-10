@@ -1,0 +1,5 @@
+tensorboard
+sentencepiece
+boto3
+jieba
+ftfy

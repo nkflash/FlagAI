@@ -323,8 +323,8 @@ class Trainer():
             return torch.utils.data.DataLoader(dataset,
                                                batch_size=self.batch_size,
                                                collate_fn=collate_fn,
-                                               num_workers=4,
-                                               prefetch_factor=4,
+                                               num_workers=0,
+                                               #prefetch_factor=4,
                                                pin_memory=True,
                                                drop_last=False,
                                                shuffle=shuffle)
